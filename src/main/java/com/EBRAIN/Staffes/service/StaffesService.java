@@ -6,86 +6,176 @@ import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import com.EBRAIN.Staffes.common.APIResponse;
+import com.EBRAIN.Staffes.common.BadRequestException;
+import com.EBRAIN.Staffes.common.Error;
+import com.EBRAIN.Staffes.common.data.StaffesData;
 import com.EBRAIN.Staffes.entity.Staffes;
 import com.EBRAIN.Staffes.repository.StaffesRepositoroy;
+import com.EBRAIN.Staffes.validator.StaffesValidator;
 
 @Service
 public class StaffesService {
 
 	@Autowired
-	StaffesRepositoroy staffrepository;
-	
-	//post method
+	StaffesRepositoroy staffRepository;
+
+	@Autowired
+	StaffesValidator staffesValidator;
+
+	// List post method
 	public List<Staffes> post(List<Staffes> staffes) {
-		// TODO Auto-generated method stub
-		return staffrepository.saveAll(staffes);
+
+		return staffRepository.saveAll(staffes);
 	}
 
-	//get by id
+	// post method
+	public void saveStaffe(Staffes staffes) {
+
+		// validation
+
+		List<Error> errors = staffesValidator.validateCreateStaffesRequest(staffes);
+
+		// if not success
+		if (errors.size() > 0) {
+			throw new BadRequestException("Bad Request", errors);
+		}
+
+		// if success
+		staffRepository.save(staffes);
+	}
+
+	// get by id
 	public Optional<Staffes> getbyid(UUID id) {
 		// TODO Auto-generated method stub
-		return staffrepository.findById(id);
+		return staffRepository.findById(id);
 	}
 
-	//get list method
-	public List<Staffes> getstaffes() {
+	// get list with @RequestParam method
+	public List<Staffes> getstaffes(String status) {
 		// TODO Auto-generated method stub
-		return staffrepository.findAll();
+		if (status == null) {
+			return staffRepository.findAll();
+		} else {
+			return staffRepository.findAllBystatus(status);
+		}
 	}
 
-	//get by name
+	public APIResponse getstaffesAPIRes(String status) {
+
+		APIResponse apiResponse = new APIResponse();
+
+		// DB call
+		List<Staffes> staffesList = staffRepository.findAll();
+
+		// Set Data
+//		Map<Object, Object> data = new HashMap<>();
+//		data.put("staffes", staffesList);
+//		         (or)
+		// Set data
+		StaffesData staffesData = new StaffesData();
+		staffesData.setStaffes(staffesList);
+
+		StaffesData staffeData = new StaffesData();
+		staffeData.setStaffe(null);
+
+		// set api Response
+//		apiResponse.setData(data);
+//		apiResponse.setStatus(200);
+//		apiResponse.setError(null);
+//		return apiResponse;
+
+		if (status == null) {
+
+			apiResponse.setStatus(HttpStatus.OK.value());
+			apiResponse.setData(staffesData);
+			return apiResponse;
+		} else {
+			apiResponse.setStatus(HttpStatus.OK.value());
+			apiResponse.setData(staffRepository.findAllBystatus(status));
+			return apiResponse;
+		}
+	}
+
+	// get by name
 	public Optional<Staffes> getbyname(String name) {
 		// TODO Auto-generated method stub
-		return staffrepository.findByName(name);
+		return staffRepository.findByName(name);
 	}
 
-
-
-
-	//update method
+	// update method
 	public Staffes update(Staffes request) {
 		// TODO Auto-generated method stub
-		return staffrepository.save(request);
+		return staffRepository.save(request);
 	}
 
-	//delete method
+	// delete method
 	public void delete(Staffes staffes) {
 		// TODO Auto-generated method stub
-		staffrepository.delete(staffes);
+		staffRepository.delete(staffes);
 	}
 
+	// get some values method
 	public List<Staffes> getActiveStatusList(String status) {
-		List<Staffes> list = staffrepository.findAll();
-		List<Staffes> activeList = new ArrayList<>();
+		if (status == null) {
+			return staffRepository.findAll();
+		} else {
+			List<Staffes> list = staffRepository.findAll();
+			List<Staffes> activeList = new ArrayList<>();
+			for (Staffes i : list) {
+
+				if (i.getStatus().equalsIgnoreCase(status)) {
+					activeList.add(i);
+				}
+			}
+			return activeList;
+		}
+
+	}
+
+	// update by active method
+	public List<Staffes> putActiveStaffes() {
+		List<Staffes> list = staffRepository.findAll();
+		List<Staffes> updatedStaffList = new ArrayList<>();
 
 		for (Staffes i : list) {
-
-			if (i.getStauts().equalsIgnoreCase(status)) {
-				activeList.add(i);
+			if (i.getStatus().equalsIgnoreCase("inactive")) {
+				i.setStatus("Active");
+				updatedStaffList.add(i);
 			}
 		}
-		return activeList;
-
+		return staffRepository.saveAllAndFlush(updatedStaffList);
 	}
 
-	public void saveStaff(Staffes staffes) {
-		staffrepository.save(staffes);
-		
+	// Exception Handling
+	public APIResponse getCoughtException(int number) {
+
+		APIResponse apiResponse = new APIResponse();
+
+		int result = 100 / number;
+
+		apiResponse.setStatus(HttpStatus.OK.value());
+		apiResponse.setData(result);
+
+		return apiResponse;
 	}
 
-	public List<Staffes> putActiveStaffes() {
-		List<Staffes> list =staffrepository.findAll();
-		List<Staffes> updatedStaffList = new ArrayList<>();
-		
-		for(Staffes i : list) {
-			if(i.getStauts().equalsIgnoreCase("inactive")) {
-			i.setStauts("Active");
-			updatedStaffList.add(i);
-			}
-		}
-		return staffrepository.saveAllAndFlush(updatedStaffList);
+	// get by some fields method
+	public Staffes getBySomeFields(String status, String name, String phoen) {
+
+		//if (status == null && name == null && phoen == null) {
+
+			//return staffrepository.findAll();
+		//} else {
+
+			return staffRepository.findByFields(status, name, phoen);
+		//}
+		// return
+		// staffrepository.findAllByStatusAndNameAndPhoennum(status,name,phoennum);
+
 	}
 
 }

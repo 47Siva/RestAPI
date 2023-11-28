@@ -12,8 +12,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.EBRAIN.Staffes.common.APIResponse;
 import com.EBRAIN.Staffes.entity.Staffes;
 import com.EBRAIN.Staffes.service.StaffesService;
 
@@ -30,18 +32,25 @@ public class StaffesController {
 		return staffservice.post(staffes);
 	}
 	
-	@PostMapping("/staff")
-	public String postStaff (@RequestBody Staffes staffes) {
-		staffservice.saveStaff(staffes);
+	@PostMapping("/stafesf")
+	public String postStaffe (@RequestBody Staffes staffes) {
+		staffservice.saveStaffe(staffes);
 		return "Staff successfully saved";
 	}
 
-	// get list method
-	@GetMapping("/getstaff")
-	public List<Staffes> getStaffes() {
-		return staffservice.getstaffes();
+	// get list with @RequestParam method
+	@GetMapping("/getstaffParam")
+	public List<Staffes> getStaffes(@RequestParam(value = "status",required = false) String status) {
+		return staffservice.getstaffes(status);
 	}
-
+	
+	// get list with APIResponse @RequestParam method
+	@GetMapping("/getstaffAPIResParam")
+	public APIResponse getStaffesAPIRes(@RequestParam(value = "status",required = false) String status) {
+		
+		return staffservice.getstaffesAPIRes(status);
+	}
+	
 	// get by id method
 	@GetMapping("/getbyid/{id}")
 	public Optional<Staffes> getbyid(@PathVariable UUID id) {
@@ -56,7 +65,7 @@ public class StaffesController {
 	
 	// get by status
 	 @GetMapping("/getactive/{status}") 
-     public List<Staffes> getActiveStaffes(@PathVariable(value = "status") String status){
+     public List<Staffes> getActiveStaffes(@PathVariable(value = "status",required = false) String status){
 		  return staffservice.getActiveStatusList(status);
 	}
 
@@ -72,9 +81,26 @@ public class StaffesController {
 		staffservice.delete(staffes);
 	}
 
+	// Status update method
 	@PutMapping("/statusUpdate")
 	public List<Staffes> putActiveStaffes(){
 		return staffservice.putActiveStaffes();
+	}
+	
+	//Exception Handling
+	@GetMapping("/caughtException")
+	public APIResponse geCoughtException(@RequestParam (value = "number",required = false) int number) {
+		
+		return staffservice.getCoughtException(number);
+	}
+	
+	//get by some entity fields
+	@GetMapping("getBySomeFields")
+	public Staffes getBySomeFields(@RequestParam(value = "status",required = false) String status,
+			                           @RequestParam (value = "name",required = false) String name,
+			                           @RequestParam (value = "phoen",required = false) String phoen) {
+		
+		return staffservice.getBySomeFields(status,name,phoen);
 	}
 	
 }

@@ -29,15 +29,15 @@ public class Staffes {
 	@Column(name = "id")
 	private UUID id;
 	
-	@Column(name = "Name")
+	@Column(name = "name")
 	private String name;
 	
-	@Column(name = "Email")
+	@Column(name = "email")
 	private String emailid;
 	
-	@Column(name = "Status")
-	private String stauts;
+	@Column(name = "status")
+	private String status;
 	
-	@Column(name = "Phoen")
-	private String phoennum;
+	@Column(name = "phoen")
+	private String phoen;
 }
