@@ -96,9 +96,9 @@ public class StaffesController {
 	
 	//get by some entity fields
 	@GetMapping("getBySomeFields")
-	public Staffes getBySomeFields(@RequestParam(value = "status",required = false) String status,
-			                           @RequestParam (value = "name",required = false) String name,
-			                           @RequestParam (value = "phoen",required = false) String phoen) {
+	public Staffes getBySomeFields(@RequestParam(value = "status",required = true) String status,
+			                           @RequestParam (value = "name",required = true) String name,
+			                           @RequestParam (value = "phoen",required = true) String phoen) {
 		
 		return staffservice.getBySomeFields(status,name,phoen);
 	}
